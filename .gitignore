@@ -1,0 +1,9 @@
+# IntelliJ IDEA project files
+.idea/
+*.iml
+out/
+gen/
+.venv/
+.env
+__pycache__
+.adk
