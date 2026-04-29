@@ -114,21 +114,16 @@ adk web
 
 ## IAM Permissions
 
-The account running the agent needs the following roles on your GCP project:
+IAM roles are provisioned by Terraform alongside the data store. Set `member_email` in your `.tfvars` or pass it via `-var`:
 
-```bash
-gcloud projects add-iam-policy-binding {YOUR_PROJECT_ID} \
-  --member="user:{YOUR_EMAIL}" \
-  --role="roles/discoveryengine.viewer"
-
-gcloud projects add-iam-policy-binding {YOUR_PROJECT_ID} \
-  --member="user:{YOUR_EMAIL}" \
-  --role="roles/aiplatform.user"
-
-gcloud projects add-iam-policy-binding {YOUR_PROJECT_ID} \
-  --member="user:{YOUR_EMAIL}" \
-  --role="roles/datastore.user"
+```hcl
+# terraform.tfvars
+member_email = "user:you@example.com"
+# or for a service account:
+# member_email = "serviceAccount:sa@your-project.iam.gserviceaccount.com"
 ```
+
+Terraform grants `roles/discoveryengine.viewer`, `roles/aiplatform.user`, and `roles/datastore.user` to that identity.
 
 ---
 
@@ -168,17 +163,14 @@ Add them to the agent's `tools` list to start using them.
 gcloud builds submit --tag us-central1-docker.pkg.dev/{YOUR_PROJECT_ID}/{YOUR_REPO}/agent:latest .
 ```
 
-### 2. Deploy
+### 2. Deploy via Terraform
 
-```bash
-gcloud run deploy agent-service \
-  --image=us-central1-docker.pkg.dev/{YOUR_PROJECT_ID}/{YOUR_REPO}/agent:latest \
-  --set-env-vars="GOOGLE_API_KEY={YOUR_GOOGLE_API_KEY}" \
-  --set-env-vars="GOOGLE_CLOUD_PROJECT={YOUR_PROJECT_ID}" \
-  --set-env-vars="GOOGLE_CLOUD_LOCATION=global" \
-  --set-env-vars="VERTEX_DATA_STORE_ID={YOUR_DATA_STORE_ID}" \
-  --set-env-vars="USE_DATASTORE=true" \
-  --region=us-central1 \
-  --allow-unauthenticated \
-  --memory=1Gi
+Set `container_image` and `google_api_key` in your `.tfvars`, then run `uv run tf-deploy`. Terraform provisions the Cloud Run service, wires in all environment variables from the data store output, and grants public invoker access.
+
+```hcl
+# terraform.tfvars
+container_image = "us-central1-docker.pkg.dev/{YOUR_PROJECT_ID}/{YOUR_REPO}/agent:latest"
+google_api_key  = "{YOUR_GOOGLE_API_KEY}"
 ```
+
+The public URL is printed as the `cloud_run_url` output.

@@ -50,6 +50,20 @@ questions = [
         "hint": "set to 'true' to use GCP Datastore database, set to anything else to use local SQLite database",
         "color": "cyan",
     },
+    {
+        "key": "MEMBER_EMAIL",
+        "prompt": "IAM member for Terraform",
+        "hint": "e.g. user:you@example.com or serviceAccount:sa@project.iam.gserviceaccount.com",
+        "default": "",
+        "color": "yellow",
+    },
+    {
+        "key": "CONTAINER_IMAGE",
+        "prompt": "Container image for Cloud Run (leave blank to skip)",
+        "hint": "e.g. us-central1-docker.pkg.dev/PROJECT/REPO/agent:latest",
+        "default": "",
+        "color": "yellow",
+    },
 ]
 
 

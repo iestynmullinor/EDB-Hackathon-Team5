@@ -31,6 +31,9 @@ def build_env() -> dict[str, str]:
         env[f"TF_VAR_{key}"] = value
     env["TF_VAR_project_id"] = dot_env.get("GOOGLE_CLOUD_PROJECT", "")
     env["TF_VAR_website_domain"] = dot_env.get("WEBSITE_DOMAIN", "")
+    env["TF_VAR_member_email"] = dot_env.get("MEMBER_EMAIL", "")
+    env["TF_VAR_google_api_key"] = dot_env.get("GOOGLE_API_KEY", "")
+    env["TF_VAR_container_image"] = dot_env.get("CONTAINER_IMAGE", "")
     return env
 
 

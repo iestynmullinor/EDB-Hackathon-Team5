@@ -17,6 +17,22 @@ variable "website_domain" {
   description = "The domain to crawl for the vector search data store (e.g. www.example.com)"
 }
 
+variable "member_email" {
+  type        = string
+  description = "Email of the user or service account to grant IAM roles (e.g. user:you@example.com or serviceAccount:sa@project.iam.gserviceaccount.com)"
+}
+
+variable "google_api_key" {
+  type        = string
+  sensitive   = true
+  description = "Gemini API key passed to the Cloud Run service"
+}
+
+variable "container_image" {
+  type        = string
+  description = "Fully-qualified container image to deploy (e.g. us-central1-docker.pkg.dev/PROJECT/REPO/agent:latest)"
+}
+
 provider "google" {
   project               = var.project_id
   region                = "us-central1"
@@ -60,8 +76,77 @@ resource "google_discovery_engine_search_engine" "website_search_app" {
   }
 }
 
+# 4. IAM — grant the agent's identity the roles it needs
+locals {
+  iam_roles = [
+    "roles/discoveryengine.viewer",
+    "roles/aiplatform.user",
+    "roles/datastore.user",
+  ]
+}
+
+resource "google_project_iam_member" "agent_roles" {
+  for_each = toset(local.iam_roles)
+  project  = var.project_id
+  role     = each.value
+  member   = var.member_email
+}
+
+# 5. Cloud Run service
+resource "google_cloud_run_v2_service" "agent" {
+  project  = var.project_id
+  name     = "agent-service"
+  location = "us-central1"
+
+  template {
+    containers {
+      image = var.container_image
+
+      resources {
+        limits = {
+          memory = "1Gi"
+        }
+      }
+
+      env {
+        name  = "GOOGLE_API_KEY"
+        value = var.google_api_key
+      }
+      env {
+        name  = "GOOGLE_CLOUD_PROJECT"
+        value = var.project_id
+      }
+      env {
+        name  = "GOOGLE_CLOUD_LOCATION"
+        value = "global"
+      }
+      env {
+        name  = "VERTEX_DATA_STORE_ID"
+        value = google_discovery_engine_search_engine.website_search_app.engine_id
+      }
+      env {
+        name  = "USE_DATASTORE"
+        value = "true"
+      }
+    }
+  }
+}
+
+resource "google_cloud_run_v2_service_iam_member" "public_invoker" {
+  project  = google_cloud_run_v2_service.agent.project
+  location = google_cloud_run_v2_service.agent.location
+  name     = google_cloud_run_v2_service.agent.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
 # Output the Engine ID — use this as VERTEX_DATA_STORE_ID in your .env
 output "vertex_data_store_id" {
   description = "Set this as VERTEX_DATA_STORE_ID in bank_agent/.env"
   value       = google_discovery_engine_search_engine.website_search_app.engine_id
+}
+
+output "cloud_run_url" {
+  description = "Public URL of the deployed agent"
+  value       = google_cloud_run_v2_service.agent.uri
 }
