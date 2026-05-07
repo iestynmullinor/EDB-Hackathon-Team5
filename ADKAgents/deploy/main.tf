@@ -40,6 +40,43 @@ provider "google" {
   billing_project       = var.project_id
 }
 
+# 0. Enable required APIs
+resource "google_project_service" "apis" {
+  for_each = toset([
+    "cloudresourcemanager.googleapis.com",
+    "discoveryengine.googleapis.com",
+    "aiplatform.googleapis.com",
+    "run.googleapis.com",
+    "firestore.googleapis.com",
+    "iam.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "cloudtrace.googleapis.com",
+  ])
+  project                    = var.project_id
+  service                    = each.value
+  disable_on_destroy         = false
+}
+
+# 0b. Wait for API propagation before creating dependent resources
+resource "time_sleep" "api_propagation" {
+  create_duration = "30s"
+  depends_on      = [google_project_service.apis]
+}
+
+# 0c. Artifact Registry repository for the agent container image
+resource "google_artifact_registry_repository" "agent_repo" {
+  project       = var.project_id
+  location      = "us-central1"
+  repository_id = "agent-repo"
+  format        = "DOCKER"
+  depends_on    = [time_sleep.api_propagation]
+}
+
+locals {
+  image_url = "us-central1-docker.pkg.dev/${var.project_id}/agent-repo/agent:latest"
+}
+
 # 1. Create the Data Store
 resource "google_discovery_engine_data_store" "website_datastore" {
   project                     = var.project_id
@@ -50,6 +87,7 @@ resource "google_discovery_engine_data_store" "website_datastore" {
   content_config              = "PUBLIC_WEBSITE"
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
   create_advanced_site_search = false
+  depends_on                  = [google_project_service.apis]
 }
 
 # 2. Crawl all pages under the domain
@@ -86,17 +124,20 @@ locals {
 }
 
 resource "google_project_iam_member" "agent_roles" {
-  for_each = toset(local.iam_roles)
-  project  = var.project_id
-  role     = each.value
-  member   = var.member_email
+  for_each   = toset(local.iam_roles)
+  project    = var.project_id
+  role       = each.value
+  member     = var.member_email
+  depends_on = [google_project_service.apis]
 }
 
-# 5. Cloud Run service
+# 5. Cloud Run service (only when CONTAINER_IMAGE is set)
 resource "google_cloud_run_v2_service" "agent" {
-  project  = var.project_id
-  name     = "agent-service"
-  location = "us-central1"
+  count               = var.container_image != "" ? 1 : 0
+  project             = var.project_id
+  name                = "agent-service"
+  location            = "us-central1"
+  deletion_protection = false
 
   template {
     containers {
@@ -104,7 +145,8 @@ resource "google_cloud_run_v2_service" "agent" {
 
       resources {
         limits = {
-          memory = "1Gi"
+          memory = "2Gi"
+          cpu    = "1"
         }
       }
 
@@ -128,14 +170,19 @@ resource "google_cloud_run_v2_service" "agent" {
         name  = "USE_DATASTORE"
         value = "true"
       }
+      env {
+        name  = "TRACE_TO_CLOUD"
+        value = "true"
+      }
     }
   }
 }
 
 resource "google_cloud_run_v2_service_iam_member" "public_invoker" {
-  project  = google_cloud_run_v2_service.agent.project
-  location = google_cloud_run_v2_service.agent.location
-  name     = google_cloud_run_v2_service.agent.name
+  count    = var.container_image != "" ? 1 : 0
+  project  = google_cloud_run_v2_service.agent[0].project
+  location = google_cloud_run_v2_service.agent[0].location
+  name     = google_cloud_run_v2_service.agent[0].name
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
@@ -146,7 +193,12 @@ output "vertex_data_store_id" {
   value       = google_discovery_engine_search_engine.website_search_app.engine_id
 }
 
+output "image_url" {
+  description = "Fully-qualified container image URL to use as CONTAINER_IMAGE"
+  value       = local.image_url
+}
+
 output "cloud_run_url" {
   description = "Public URL of the deployed agent"
-  value       = google_cloud_run_v2_service.agent.uri
+  value       = var.container_image != "" ? google_cloud_run_v2_service.agent[0].uri : "(no container image set)"
 }

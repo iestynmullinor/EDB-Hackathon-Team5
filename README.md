@@ -25,15 +25,77 @@ EDB-Hackathon-Starter/
 
 - **Python 3.14+** — [python.org/downloads](https://www.python.org/downloads/)
 - **uv** — [docs.astral.sh/uv/getting-started/installation](https://docs.astral.sh/uv/getting-started/installation/)
-- **Terraform** — [developer.hashicorp.com/terraform/install](https://developer.hashicorp.com/terraform/install)
+- **Terraform** — [developer.hashicorp.com/terraform/install](https://developer.hashicorp.com/terraform/install) or `winget install HashiCorp.Terraform` on Windows
 - **Google Cloud SDK** — [cloud.google.com/sdk/docs/install](https://cloud.google.com/sdk/docs/install)
 - A Google Cloud project with billing enabled
+
+---
+
+## GCP Project Setup
+
+### Create a project
+
+```bash
+gcloud projects create YOUR_PROJECT_ID --name="Your Project Name"
+gcloud config set project YOUR_PROJECT_ID
+```
+
+### Enable billing
+
+```bash
+# List your billing accounts
+gcloud billing accounts list
+
+# Link one to the project
+gcloud billing projects link YOUR_PROJECT_ID --billing-account=BILLING_ACCOUNT_ID
+```
+
+### Authenticate
+
+```bash
+gcloud auth login
+gcloud auth application-default login
+gcloud auth application-default set-quota-project YOUR_PROJECT_ID
+```
+
+### Get a Gemini API key
+
+**Option A — AI Studio (personal use):** Visit [aistudio.google.com/apikey](https://aistudio.google.com/apikey) and create a key.
+
+**Option B — via gcloud (project-scoped):**
+
+```bash
+gcloud services enable apikeys.googleapis.com generativelanguage.googleapis.com
+gcloud services api-keys create \
+  --display-name="Gemini API Key" \
+  --api-target=service=generativelanguage.googleapis.com
+```
+
+The key string is printed in the output — copy it into `GOOGLE_API_KEY` in your `.env`.
+
+### Create a service account (recommended)
+
+```bash
+gcloud iam service-accounts create terraform-deployer \
+  --display-name="Terraform Deployer" \
+  --project=YOUR_PROJECT_ID
+```
+
+Then set `MEMBER_EMAIL` in your `.env`:
+
+```dotenv
+MEMBER_EMAIL=serviceAccount:terraform-deployer@YOUR_PROJECT_ID.iam.gserviceaccount.com
+```
+
+Terraform will grant this identity the roles it needs during `tf-deploy`.
 
 ---
 
 ## Setup
 
 ### 1. Install dependencies
+
+All commands below must be run from the `ADKAgents` directory:
 
 ```bash
 cd ADKAgents
@@ -73,7 +135,7 @@ You'll be prompted for:
 uv run tf-deploy
 ```
 
-This runs `terraform init` + `terraform apply` and outputs your `VERTEX_DATA_STORE_ID`. Re-run `uv run setup-env` and paste it in.
+This runs `terraform init` + `terraform apply`, builds and pushes your container image via Cloud Build, and deploys to Cloud Run. **Expect this to take around 10 minutes** on a fresh project. Once complete, your `VERTEX_DATA_STORE_ID` and Cloud Run URL are printed automatically.
 
 You can also run individual Terraform commands via the `tf` wrapper:
 
@@ -114,14 +176,16 @@ adk web
 
 ## IAM Permissions
 
-IAM roles are provisioned by Terraform alongside the data store. Set `member_email` in your `.tfvars` or pass it via `-var`:
+IAM roles are provisioned by Terraform alongside the data store. Set `MEMBER_EMAIL` in your `.env` file:
 
-```hcl
-# terraform.tfvars
-member_email = "user:you@example.com"
+```dotenv
+# ADKAgents/bank_agent/.env
+MEMBER_EMAIL=user:you@example.com
 # or for a service account:
-# member_email = "serviceAccount:sa@your-project.iam.gserviceaccount.com"
+# MEMBER_EMAIL=serviceAccount:sa@your-project.iam.gserviceaccount.com
 ```
+
+`tf-deploy` reads this value automatically and passes it to Terraform as `TF_VAR_member_email`.
 
 Terraform grants `roles/discoveryengine.viewer`, `roles/aiplatform.user`, and `roles/datastore.user` to that identity.
 
@@ -175,4 +239,4 @@ container_image = "us-central1-docker.pkg.dev/{YOUR_PROJECT_ID}/{YOUR_REPO}/agen
 google_api_key  = "{YOUR_GOOGLE_API_KEY}"
 ```
 
-The public URL is printed as the `cloud_run_url` output.
+The public URL is printed as the `cloud_run_url` output. Once deployed, open `{cloud_run_url}/dev-ui/` to access the agent web interface.

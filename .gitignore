@@ -7,3 +7,11 @@ gen/
 .env
 __pycache__
 .adk
+
+uv.lock
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup

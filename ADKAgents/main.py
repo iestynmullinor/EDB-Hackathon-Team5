@@ -15,7 +15,7 @@ app = get_fast_api_app(
     agents_dir=AGENT_DIR,
     allow_origins=["*"],
     web=True,
-    trace_to_cloud=True
+    trace_to_cloud=os.environ.get("TRACE_TO_CLOUD", "false").lower() == "true",
 )
 
 if __name__ == "__main__":

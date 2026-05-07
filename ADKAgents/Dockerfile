@@ -18,13 +18,15 @@ COPY pyproject.toml uv.lock ./
 # Install dependencies into the system environment
 # --system tells uv to install without a virtualenv (ideal for containers)
 #RUN uv pip install --system --requirement pyproject.toml
-RUN uv sync --frozen --no-dev --no-install-project
+RUN uv sync --frozen --no-dev
 
 # Copy the rest of your agent code
 COPY . .
+
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Expose the ADK port
 EXPOSE 8080
 
 # Run your agent
-CMD ["uv","run","uvicorn","main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn","main:app", "--host", "0.0.0.0", "--port", "8080"]
