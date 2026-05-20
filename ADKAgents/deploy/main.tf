@@ -33,6 +33,12 @@ variable "container_image" {
   description = "Fully-qualified container image to deploy (e.g. us-central1-docker.pkg.dev/PROJECT/REPO/agent:latest)"
 }
 
+variable "data_store_id" {
+  type        = string
+  default     = "website-ds"
+  description = "ID for the Discovery Engine data store. Auto-incremented by tf-deploy if the previous one is still being deleted."
+}
+
 provider "google" {
   project               = var.project_id
   region                = "us-central1"
@@ -81,8 +87,8 @@ locals {
 resource "google_discovery_engine_data_store" "website_datastore" {
   project                     = var.project_id
   location                    = "global"
-  data_store_id               = "website-ds"
-  display_name                = "website-ds"
+  data_store_id               = var.data_store_id
+  display_name                = var.data_store_id
   industry_vertical           = "GENERIC"
   content_config              = "PUBLIC_WEBSITE"
   solution_types              = ["SOLUTION_TYPE_SEARCH"]
@@ -115,12 +121,18 @@ resource "google_discovery_engine_search_engine" "website_search_app" {
 }
 
 # 4. IAM — grant the agent's identity the roles it needs
+data "google_project" "project" {
+  project_id = var.project_id
+  depends_on = [google_project_service.apis]
+}
+
 locals {
-  iam_roles = [
+  iam_roles           = [
     "roles/discoveryengine.viewer",
     "roles/aiplatform.user",
     "roles/datastore.user",
   ]
+  compute_sa = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "agent_roles" {
@@ -128,6 +140,14 @@ resource "google_project_iam_member" "agent_roles" {
   project    = var.project_id
   role       = each.value
   member     = var.member_email
+  depends_on = [google_project_service.apis]
+}
+
+# Allow Cloud Run's default service account to pull images from Artifact Registry
+resource "google_project_iam_member" "cloudrun_artifact_reader" {
+  project    = var.project_id
+  role       = "roles/artifactregistry.reader"
+  member     = local.compute_sa
   depends_on = [google_project_service.apis]
 }
 
@@ -173,6 +193,17 @@ resource "google_cloud_run_v2_service" "agent" {
       env {
         name  = "TRACE_TO_CLOUD"
         value = "true"
+      }
+
+      startup_probe {
+        http_get {
+          path = "/"
+          port = 8080
+        }
+        initial_delay_seconds = 10
+        period_seconds        = 10
+        timeout_seconds       = 5
+        failure_threshold     = 12
       }
     }
   }

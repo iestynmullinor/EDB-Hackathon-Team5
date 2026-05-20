@@ -147,6 +147,16 @@ uv run tf output -raw vertex_data_store_id
 uv run tf destroy
 ```
 
+#### Last resort: obliterate
+
+If your deployment is in a broken state and you need to start completely from scratch, use:
+
+```bash
+uv run obliterate
+```
+
+This will destroy **all** Terraform-managed GCP resources (Cloud Run service, Artifact Registry, Discovery Engine data store, IAM bindings), delete local Terraform state, and reset your `.env`. You'll be asked to type the project ID to confirm. The GCP project itself is kept — only the resources inside it are removed. After obliterating, run `uv run tf-deploy` to redeploy cleanly.
+
 ### 5. Generate synthetic data
 
 ```bash

@@ -4,13 +4,14 @@
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
-from deploy.tf_run import ENV_PATH, TF_DIR, load_env, terraform
+from deploy.tf_run import ENV_PATH, TF_DIR, build_env, load_env, terraform
 
 console = Console()
 
@@ -40,15 +41,66 @@ def write_env_value(key: str, value: str) -> None:
     ENV_PATH.write_text("\n".join(lines) + "\n")
 
 
+def bootstrap_resource_manager_api(project_id: str) -> None:
+    """Enable Cloud Resource Manager API via gcloud before Terraform runs.
+
+    Terraform uses this API to manage project services — it must be enabled
+    manually first on a brand-new project, since Terraform can't enable the
+    very API it needs to enable APIs.
+    """
+    console.print(f"\n  Bootstrapping [cyan]cloudresourcemanager.googleapis.com[/cyan]...\n")
+    # Use gcloud.cmd explicitly on Windows so the correct wrapper is found
+    # regardless of whether the caller is cmd.exe or a bash shell (e.g. MSYS2).
+    gcloud = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
+    result = subprocess.run(
+        [gcloud, "services", "enable", "cloudresourcemanager.googleapis.com", "--project", project_id]
+    )
+    if result.returncode != 0:
+        console.print("[red]Failed to enable Cloud Resource Manager API.[/red]")
+        sys.exit(result.returncode)
+
+
+def terraform_apply_streaming(*args: str) -> tuple[int, str]:
+    """Run terraform apply, streaming output to the console while also capturing it."""
+    process = subprocess.Popen(
+        ["terraform", *args],
+        cwd=TF_DIR,
+        env=build_env(),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+    captured = []
+    for line in process.stdout:
+        sys.stdout.write(line)
+        sys.stdout.flush()
+        captured.append(line)
+    process.wait()
+    return process.returncode, "".join(captured)
+
+
+def phase1_apply() -> None:
+    """Run Phase 1 terraform apply, retrying with a fresh data store ID if the previous one is still being deleted."""
+    returncode, output = terraform_apply_streaming("apply", "-auto-approve", "-var=container_image=")
+    if returncode == 0:
+        return
+
+    if "is being deleted" in output and "DataStore" in output:
+        new_id = f"website-ds-{int(time.time())}"
+        console.print(f"\n  [yellow]Previous data store still deleting. Retrying with new ID:[/yellow] [cyan]{new_id}[/cyan]\n")
+        write_env_value("DATA_STORE_ID", new_id)
+        terraform("apply", "-auto-approve", "-var=container_image=")
+    else:
+        sys.exit(returncode)
+
+
 def build_and_push(image_url: str, project_id: str) -> None:
     console.print(f"\n  Building and pushing [cyan]{image_url}[/cyan] via Cloud Build...\n")
-    args = ["gcloud", "builds", "submit", "--tag", image_url, "--project", project_id, str(DOCKERFILE_DIR)]
-    # On Windows, gcloud is a .cmd script and requires shell=True; on macOS/Linux use the list directly.
-    if sys.platform == "win32":
-        cmd = " ".join(f'"{a}"' for a in args)
-        result = subprocess.run(cmd, shell=True)
-    else:
-        result = subprocess.run(args)
+    gcloud = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
+    result = subprocess.run(
+        [gcloud, "builds", "submit", "--tag", image_url, "--project", project_id, str(DOCKERFILE_DIR)]
+    )
     if result.returncode != 0:
         console.print("[red]Cloud Build failed.[/red]")
         sys.exit(result.returncode)
@@ -79,10 +131,15 @@ def main():
 
     console.print(f"\n  Using project: [cyan]{project_id}[/cyan]")
 
+    # Bootstrap the one API Terraform cannot enable itself
+    bootstrap_resource_manager_api(project_id)
+
     # Phase 1: provision infra (registry, data store, IAM — skip Cloud Run)
+    # Force container_image="" so the Cloud Run resource (count=0) is skipped
+    # until the image is actually built in the next step.
     console.print("\n  [bold]Phase 1:[/bold] Provisioning infrastructure...\n")
     terraform("init")
-    terraform("apply", "-auto-approve")
+    phase1_apply()
 
     # Build and push the container image
     image_url = tf_output("image_url")

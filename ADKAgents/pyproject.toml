@@ -16,6 +16,7 @@ dependencies = [
 setup-env = "setup_env:main"
 tf = "deploy.tf_run:main"
 tf-deploy = "deploy.tf_deploy:main"
+obliterate = "deploy.obliterate:main"
 
 [tool.uv]
 package = true
