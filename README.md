@@ -302,20 +302,31 @@ To build multi-agent pipelines, pass other `Agent` instances via `sub_agents=[..
 
 ## Deploy to Cloud Run
 
-### 1. Build the container
+`uv run tf-deploy` automates the full sequence below. If the script fails partway through, you can run these steps manually from the `ADKAgents` directory:
 
 ```bash
-gcloud builds submit --tag us-central1-docker.pkg.dev/{YOUR_PROJECT_ID}/{YOUR_REPO}/agent:latest .
+# 1. Enable the Cloud Resource Manager API (required before Terraform can enable anything else)
+gcloud services enable cloudresourcemanager.googleapis.com --project YOUR_PROJECT_ID
+
+# 2. Initialise Terraform
+cd ADKAgents
+uv run tf init
+
+# 3. Phase 1 — provision infra (Artifact Registry, Discovery Engine data store, IAM bindings)
+#    Pass an empty container_image so Cloud Run is skipped until the image exists
+uv run tf apply -auto-approve -var=container_image=
+
+# 4. Build and push the container image via Cloud Build
+IMAGE_URL=$(uv run tf output -raw image_url)
+gcloud builds submit --tag "$IMAGE_URL" --project YOUR_PROJECT_ID .
+
+# 5. Phase 2 — deploy Cloud Run with the built image
+uv run tf apply -auto-approve -replace=google_cloud_run_v2_service.agent[0]
+uv run tf apply -auto-approve
+
+# 6. Print outputs
+uv run tf output -raw cloud_run_url
+uv run tf output -raw vertex_data_store_id
 ```
 
-### 2. Deploy via Terraform
-
-Set `container_image` and `google_api_key` in your `.tfvars`, then run `uv run tf-deploy`. Terraform provisions the Cloud Run service, wires in all environment variables from the data store output, and grants public invoker access.
-
-```hcl
-# terraform.tfvars
-container_image = "us-central1-docker.pkg.dev/{YOUR_PROJECT_ID}/{YOUR_REPO}/agent:latest"
-google_api_key  = "{YOUR_GOOGLE_API_KEY}"
-```
-
-The public URL is printed as the `cloud_run_url` output. Once deployed, open `{cloud_run_url}/dev-ui/` to access the agent web interface.
+Once deployed, open `{cloud_run_url}/dev-ui/` to access the agent web interface.
