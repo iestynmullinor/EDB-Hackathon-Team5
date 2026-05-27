@@ -7,6 +7,7 @@ gen/
 .env
 __pycache__
 .adk
+.claude/*
 
 uv.lock
 
@@ -15,3 +16,9 @@ uv.lock
 .terraform.lock.hcl
 *.tfstate
 *.tfstate.backup
+
+
+# Datastore
+DataGen/documents/*
+DataGen/*.csv
+*db
