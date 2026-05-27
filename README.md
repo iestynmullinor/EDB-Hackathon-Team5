@@ -33,6 +33,7 @@ flowchart TD
     end
 
     subgraph DataGen["DataGen Pipeline (local)"]
+        Runner["run_datagen.py<br/>--firestore · --sqlite · auto"]
         Gen["dataFakeGen.py<br/>100 customers · 300 accounts<br/>6-month transactions"]
         Prep["prepare_for_nosql.py<br/>CSV → JSON documents"]
         LocalDB["localdb_setup.py → SQLite"]
@@ -62,6 +63,7 @@ flowchart TD
     Crawler --> DS
     Repo -- "pulls image" --> CloudRun
     FastAPI -- "traces" --> Trace
+    Runner --> Gen
     Gen --> Prep
     Prep --> LocalDB & Upload
     LocalDB --> SQLite
@@ -72,19 +74,25 @@ flowchart TD
 
 ```
 EDB-Hackathon-Starter/
-├── DataGen/                  # Synthetic data pipeline (CSV → Firestore / SQLite)
+├── DataGen/                        # Synthetic data pipeline (CSV → Firestore / SQLite)
+│   ├── run_datagen.py              # Single entry point — runs the full pipeline
+│   ├── dataFakeGen.py              # Generates 100 fake customers + transactions
+│   ├── prepare_for_nosql.py        # Converts CSVs to per-customer JSON documents
+│   ├── localdb_setup.py            # Loads CSVs into local SQLite
+│   └── upload_to_datestore.py      # Uploads JSON documents to Firestore
 └── ADKAgents/
     ├── bank_agent/
-    │   ├── agent.py          # Your base agent — start here
-    │   ├── prompt.py         # Agent instructions
+    │   ├── agent.py                # Your base agent — start here
+    │   ├── prompt.py               # Agent instructions
     │   └── tools/
     │       ├── customersearch.py   # Customer lookup (Firestore or SQLite)
     │       └── productsearch.py    # Vertex AI vector search
     ├── deploy/
-    │   ├── main.tf           # Terraform — provisions Vertex AI Search data store
-    │   ├── tf_deploy.py      # One-shot Terraform deploy
-    │   └── tf_run.py         # Terraform wrapper (passes .env as TF vars)
-    └── setup_env.py          # Interactive .env setup
+    │   ├── main.tf                 # Terraform — provisions all GCP infrastructure
+    │   ├── tf_deploy.py            # One-shot full deploy (infra + image + Cloud Run)
+    │   ├── tf_run.py               # Terraform wrapper (passes .env as TF vars)
+    │   └── obliterate.py           # Destroy all resources and reset state
+    └── setup_env.py                # Interactive .env setup
 ```
 
 ## Prerequisites
@@ -195,7 +203,7 @@ You'll be prompted for:
 | `VERTEX_DATA_STORE_ID` | Leave blank for now — populated after Terraform deploy |
 | `USE_DATASTORE` | `true` for Firestore, anything else uses local SQLite |
 
-### 4. Deploy the Vertex AI Search data store
+### 4. Deploy infrastructure
 
 ```bash
 cd ADKAgents
@@ -203,6 +211,16 @@ uv run tf-deploy
 ```
 
 This runs `terraform init` + `terraform apply`, builds and pushes your container image via Cloud Build, and deploys to Cloud Run. **Expect this to take around 10 minutes** on a fresh project. Once complete, your `VERTEX_DATA_STORE_ID` and Cloud Run URL are printed automatically.
+
+Terraform provisions the following resources:
+
+| Resource | Details |
+|---|---|
+| **Firestore database** | Native mode, `(default)` database, `nam5` region |
+| **Artifact Registry** | Docker repo for the agent container image |
+| **Vertex AI Search** | Discovery Engine data store + enterprise search app |
+| **Cloud Run** | Containerised agent service (2 GB RAM, us-central1) |
+| **IAM bindings** | Deployer SA + Cloud Run compute SA granted required roles |
 
 You can also run individual Terraform commands via the `tf` wrapper:
 
@@ -223,7 +241,7 @@ cd ADKAgents
 uv run obliterate
 ```
 
-This will destroy **all** Terraform-managed GCP resources (Cloud Run service, Artifact Registry, Discovery Engine data store, IAM bindings), delete local Terraform state, and reset your `.env`. You'll be asked to type the project ID to confirm. The GCP project itself is kept — only the resources inside it are removed. After obliterating, run `uv run tf-deploy` to redeploy cleanly.
+This will destroy **all** Terraform-managed GCP resources (Cloud Run service, Artifact Registry, Discovery Engine data store, Firestore database, IAM bindings), delete local Terraform state, and reset your `.env`. You'll be asked to type the project ID to confirm. The GCP project itself is kept — only the resources inside it are removed. After obliterating, run `uv run tf-deploy` to redeploy cleanly.
 
 ### 5. Generate synthetic data
 
@@ -231,17 +249,21 @@ This will destroy **all** Terraform-managed GCP resources (Cloud Run service, Ar
 cd ../DataGen
 uv sync
 
-# Generate CSVs
-uv run python dataFakeGen.py
+# Run the full pipeline in one command
+uv run python run_datagen.py            # respects USE_DATASTORE in .env
+uv run python run_datagen.py --firestore # force Firestore upload
+uv run python run_datagen.py --sqlite    # force local SQLite
+```
 
-# Merge into per-customer JSON documents
-uv run python prepare_for_nosql.py
+This generates 100 synthetic customers, ~300 accounts, and 6 months of transactions, then loads them into Firestore or SQLite depending on the flag (or `USE_DATASTORE` in your `.env`).
 
-# Load into local SQLite (for local dev)
-uv run python localdb_setup.py
+You can also run each step individually:
 
-# Or upload to Firestore (set USE_DATASTORE=true in .env)
-uv run python upload_to_datestore.py
+```bash
+uv run python dataFakeGen.py           # Generate customers.csv, accounts.csv, transactions.csv
+uv run python prepare_for_nosql.py     # Merge into per-customer JSON documents
+uv run python localdb_setup.py         # Load into local SQLite (ADKAgents/bank_data.db)
+uv run python upload_to_datestore.py   # Upload JSON documents to Firestore
 ```
 
 ### 6. Run the agent locally
@@ -267,6 +289,8 @@ MEMBER_EMAIL=user:you@example.com
 `tf-deploy` reads this value automatically and passes it to Terraform as `TF_VAR_member_email`.
 
 Terraform grants `roles/discoveryengine.viewer`, `roles/aiplatform.user`, and `roles/datastore.user` to that identity.
+
+The Cloud Run compute service account is separately granted `roles/artifactregistry.reader` (to pull images) and `roles/datastore.user` (to read/write Firestore at runtime).
 
 ---
 
@@ -312,7 +336,7 @@ gcloud services enable cloudresourcemanager.googleapis.com --project YOUR_PROJEC
 cd ADKAgents
 uv run tf init
 
-# 3. Phase 1 — provision infra (Artifact Registry, Discovery Engine data store, IAM bindings)
+# 3. Phase 1 — provision infra (Firestore, Artifact Registry, Discovery Engine data store, IAM bindings)
 #    Pass an empty container_image so Cloud Run is skipped until the image exists
 uv run tf apply -auto-approve -var=container_image=
 
