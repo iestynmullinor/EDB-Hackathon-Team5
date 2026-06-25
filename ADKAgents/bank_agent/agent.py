@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from google.adk.agents import Agent
 from google.adk.models.google_llm import Gemini
 from google.genai import Client
+from bank_agent.llm.gemini import VertexGemini
 from bank_agent.sub_agents.request_analysis_agent.agent import request_analysis_agent
 
 from .observability import (
@@ -29,17 +30,6 @@ load_dotenv()
 # Initialise OpenTelemetry exporters and the metrics store.
 setup_observability()
 
-
-class VertexGemini(Gemini):
-    """Gemini model that unconditionally uses Vertex AI (ADC) instead of an API key."""
-
-    @cached_property
-    def api_client(self) -> Client:
-        return Client(
-            vertexai=True,
-            project=os.getenv("GOOGLE_CLOUD_PROJECT"),
-            location=os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1"),
-        )
 
 root_agent = Agent(
     name="bank_agent",
