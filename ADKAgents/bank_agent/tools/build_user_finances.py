@@ -2,18 +2,18 @@
 
 from typing import Any
 
+DEFAULT_FINANCIAL_PROFILE = {
+    "income": 0.0,
+    "bills": 0.0,
+    "rent": 0.0,
+    "essentials": [],
+}
 
-def build_user_finances(common_expenses: dict[str, dict[str, float]],
+def build_user_finances(
+    financial_profile: dict[str, Any],
     customer_financial_goals: list[str],
 ) -> dict[str, Any]:
-    """
-    Stores or returns the customer's inferred financial profile.
-
-    The agent is responsible for inferring all expense values and financial goals
-    before calling this tool.
-    """
-
     return {
-        "common_expenses": common_expenses,
+        "financial_profile": financial_profile,
         "customer_financial_goals": customer_financial_goals,
     }
