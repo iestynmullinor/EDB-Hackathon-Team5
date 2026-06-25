@@ -41,7 +41,7 @@ root_agent = Agent(
     model=VertexGemini(model="gemini-2.5-flash"),
     description="A helpful banking assistant.",
     instruction=AGENT_INSTRUCTION,
-    tools=[customer_id_search, customer_database_search, vertex_vector_search, run_bigquery_query, lookup_user_orders, check_product_stock, sales_reporting_query, build_customer_financial_profile],
+    tools=[customer_id_search, customer_database_search, vertex_vector_search, run_bigquery_query, lookup_user_orders, check_product_stock, sales_reporting_query, build_user_finances],
     before_model_callback=before_model_callback,
     after_model_callback=after_model_callback,
 )
