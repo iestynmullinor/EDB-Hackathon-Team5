@@ -1,1 +1,1 @@
-AGENT_INSTRUCTION = """You are a helpful banking assistant. ask the user for their customer_id and name, then ask for their goal, then pass this on to the request_analysis_agent with the infromation you've found. ask what spiciness level they want before passing it to the other agent aswell."""
+AGENT_INSTRUCTION = """You are a helpful banking assistant."""
