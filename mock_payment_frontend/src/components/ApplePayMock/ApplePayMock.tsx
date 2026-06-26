@@ -27,32 +27,19 @@ type Props = {
 };
 
 const defaultPaymentDetails: EditablePaymentDetails = {
-  card: "Apple Card",
+  card: "Lloyds Debit Card",
   merchant: "Pet Store",
-  amount: "GBP£24.99",
-  shipLabel: "Ship to",
+  amount: "£24.99",
+  shipLabel: "Merchant",
   recipient: "Juan Chavez",
   addressLineOne: "683 Jefferson Street",
   addressLineTwo: "Tiburon CA 91423",
-  country: "United States",
+  country: "United Kingdom",
 };
 
 function makeId() {
   if ("randomUUID" in crypto) return crypto.randomUUID();
   return Math.random().toString(36).slice(2, 10);
-}
-
-function AppleLogoIcon() {
-  return (
-    <svg
-      className="apple-logo-icon"
-      viewBox="0 0 24 28"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d="M18.9 14.6c0-3 2.5-4.4 2.6-4.5-1.4-2.1-3.6-2.4-4.4-2.4-1.9-.2-3.6 1.1-4.6 1.1-.9 0-2.4-1.1-4-1.1-2.1 0-4 1.2-5 3.1-2.2 3.8-.6 9.4 1.5 12.5 1 1.5 2.3 3.2 3.9 3.1 1.6-.1 2.2-1 4-1s2.3 1 4 1c1.7 0 2.7-1.5 3.7-3 1.2-1.7 1.7-3.3 1.7-3.4-.1-.1-3.3-1.3-3.4-5.4ZM15.9 5.7c.9-1 1.4-2.4 1.3-3.8-1.2.1-2.6.8-3.5 1.8-.8.9-1.5 2.3-1.3 3.7 1.3.1 2.7-.7 3.5-1.7Z" />
-    </svg>
-  );
 }
 
 function CloseIcon() {
@@ -81,77 +68,41 @@ function ChevronIcon() {
   );
 }
 
-function AppleCardIcon() {
+function LloydsCardIcon() {
   return (
     <svg
-      className="apple-card-icon"
+      className="lloyds-card-icon"
       viewBox="0 0 48 34"
       aria-hidden="true"
       focusable="false"
     >
       <defs>
-        <linearGradient
-          id="cardBaseGradient"
-          x1="5"
-          x2="43"
-          y1="2"
-          y2="32"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#fff7df" />
-          <stop offset="0.48" stopColor="#f8faff" />
-          <stop offset="1" stopColor="#ffffff" />
+        <linearGradient id="lbgGrad" x1="0" y1="0" x2="48" y2="34" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#006A4E" />
+          <stop offset="1" stopColor="#004D38" />
         </linearGradient>
-        <radialGradient
-          id="cardWarmBlob"
-          cx="0"
-          cy="0"
-          r="1"
-          gradientTransform="translate(14 15) rotate(47) scale(16 13)"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#ff8a3d" />
-          <stop offset="0.45" stopColor="#ffd84d" />
-          <stop offset="1" stopColor="#ffd84d" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient
-          id="cardCoolBlob"
-          cx="0"
-          cy="0"
-          r="1"
-          gradientTransform="translate(31 18) rotate(133) scale(19 15)"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#fb4dff" />
-          <stop offset="0.45" stopColor="#3478ff" />
-          <stop offset="1" stopColor="#3478ff" stopOpacity="0" />
-        </radialGradient>
       </defs>
-      <rect width="48" height="34" rx="7" fill="url(#cardBaseGradient)" />
-      <rect
-        width="48"
-        height="34"
-        rx="7"
-        fill="url(#cardWarmBlob)"
-        opacity="0.92"
-      />
-      <rect
-        width="48"
-        height="34"
-        rx="7"
-        fill="url(#cardCoolBlob)"
-        opacity="0.86"
-      />
-      <rect
-        x="0.5"
-        y="0.5"
-        width="47"
-        height="33"
-        rx="6.5"
-        fill="none"
-        stroke="white"
-        strokeOpacity="0.55"
-      />
+      <rect width="48" height="34" rx="7" fill="url(#lbgGrad)" />
+      <rect x="0.5" y="0.5" width="47" height="33" rx="6.5" fill="none" stroke="white" strokeOpacity="0.2" />
+      {/* Lloyds wordmark */}
+      <text x="7" y="14" fill="white" fillOpacity="0.9" fontSize="5" fontWeight="bold" fontFamily="Arial, sans-serif">LLOYDS</text>
+      <text x="7" y="20" fill="white" fillOpacity="0.6" fontSize="3.5" fontFamily="Arial, sans-serif">BANK</text>
+      {/* Card number dots */}
+      <g fill="white" fillOpacity="0.55">
+        <circle cx="8" cy="28" r="1.3" />
+        <circle cx="12" cy="28" r="1.3" />
+        <circle cx="16" cy="28" r="1.3" />
+        <circle cx="20" cy="28" r="1.3" />
+        <circle cx="26" cy="28" r="1.3" />
+        <circle cx="30" cy="28" r="1.3" />
+        <circle cx="34" cy="28" r="1.3" />
+        <circle cx="38" cy="28" r="1.3" />
+      </g>
+      {/* Contactless symbol */}
+      <g fill="none" stroke="white" strokeOpacity="0.7" strokeWidth="1.2" strokeLinecap="round">
+        <path d="M39 8a5 5 0 0 1 0 7" />
+        <path d="M41 6a8 8 0 0 1 0 11" />
+      </g>
     </svg>
   );
 }
@@ -199,7 +150,7 @@ function DogFoodIcon() {
         fill="white"
         opacity="0.78"
       />
-      <circle cx="35.9" cy="20.7" r="1.3" fill="#3d894f" />
+      <circle cx="35.9" cy="20.7" r="1.3" fill="#006A4E" />
       <path
         d="M18.2 37.2v5.2M26 38.7v4.5M33.8 37.2v5.2"
         stroke="white"
@@ -211,7 +162,8 @@ function DogFoodIcon() {
   );
 }
 
-function SideButtonIcon() {
+function TapPayIcon() {
+  // NFC / contactless tap icon
   return (
     <svg
       className="side-button-svg"
@@ -219,33 +171,19 @@ function SideButtonIcon() {
       aria-hidden="true"
       focusable="false"
     >
-      <circle
-        cx="16"
-        cy="16"
-        r="14"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.25"
-      />
-      <path
-        d="M16 7.8v16.4"
-        stroke="currentColor"
-        strokeWidth="2.25"
-        strokeLinecap="round"
-      />
-      <path
-        d="m13 12.2 4 3.8-4 3.8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="2.25" />
+      <g fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M11 16a5 5 0 0 1 5-5" />
+        <path d="M11 16a5 5 0 0 0 5 5" />
+        <path d="M14 16a2 2 0 0 1 2-2" />
+        <path d="M14 16a2 2 0 0 0 2 2" />
+      </g>
+      <circle cx="16" cy="16" r="1.4" fill="currentColor" />
     </svg>
   );
 }
 
-function FaceIdIcon() {
+function FingerprintIcon() {
   return (
     <svg
       className="face-id-svg"
@@ -253,27 +191,10 @@ function FaceIdIcon() {
       aria-hidden="true"
       focusable="false"
     >
-      <path
-        d="M11 3H7a4 4 0 0 0-4 4v4M29 3h4a4 4 0 0 1 4 4v4M3 29v4a4 4 0 0 0 4 4h4M37 29v4a4 4 0 0 1-4 4h-4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      <path
-        d="M15 15v3.7M25 15v3.7M20 14.8v8.1c0 1.3-.7 2-2.1 2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M13.8 28.2c1.4 1.8 3.5 2.8 6.2 2.8s4.8-1 6.2-2.8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
+      <path d="M20 6C12.3 6 6 12.3 6 20s6.3 14 14 14 14-6.3 14-14S27.7 6 20 6Z" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M14 20c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M17 20a3 3 0 1 1 6 0" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M11 20c0-5 4-9 9-9s9 4 9 9c0 3-1.4 5.7-3.5 7.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -377,7 +298,7 @@ export default function ApplePayMock({ onClose }: Props = {}) {
   return (
     <section
       className={`apple-pay-screen ${status}`}
-      aria-label="Mock Apple Pay screen"
+      aria-label="Mock Lloyds Pay screen"
     >
       <div className="apple-pay-canvas">
         <div className="basket-page" aria-hidden="true">
@@ -404,22 +325,21 @@ export default function ApplePayMock({ onClose }: Props = {}) {
           aria-live="polite"
         >
           <header className="apple-pay-sheet-header">
-            <div className="apple-pay-wordmark" aria-label="Apple Pay">
-              <AppleLogoIcon />
-              <span>Pay</span>
+            <div className="apple-pay-wordmark" aria-label="Lloyds Pay">
+              <span>Lloyds <strong>Pay</strong></span>
             </div>
             <button
               className="apple-pay-close"
               onClick={handleClose}
               type="button"
-              aria-label="Close Apple Pay"
+              aria-label="Close Lloyds Pay"
             >
               <CloseIcon />
             </button>
           </header>
 
           <div className="apple-pay-row apple-pay-card-row">
-            <AppleCardIcon />
+            <LloydsCardIcon />
             <input
               aria-label="Payment card"
               className="apple-pay-editable-input apple-pay-card-input"
@@ -496,15 +416,15 @@ export default function ApplePayMock({ onClose }: Props = {}) {
                 onClick={performPayment}
                 type="button"
               >
-                <SideButtonIcon />
-                <span>Double-Click to Pay</span>
+                <TapPayIcon />
+                <span>Tap to Pay</span>
               </button>
             )}
 
             {status === "authorising" && (
               <div className="payment-status-panel" role="status">
-                <FaceIdIcon />
-                <span>Confirming with Face ID</span>
+                <FingerprintIcon />
+                <span>Verifying with Touch ID</span>
               </div>
             )}
 
