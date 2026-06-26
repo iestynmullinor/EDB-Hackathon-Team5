@@ -452,10 +452,12 @@ function DeclinedPaymentModal({
   message,
   paymentDetails,
   onClose,
+  onOverride,
 }: {
   message: string;
   paymentDetails: EditablePaymentDetails;
   onClose: () => void;
+  onOverride: () => void;
 }) {
   return (
     <div
@@ -504,11 +506,18 @@ function DeclinedPaymentModal({
 
         <div className="declined-modal-actions">
           <button
-            className="modal-primary-button"
+            className="modal-secondary-button"
             type="button"
             onClick={onClose}
           >
             Dismiss
+          </button>
+          <button
+            className="modal-primary-button override-authorise-button"
+            type="button"
+            onClick={onOverride}
+          >
+            Override &amp; Authorise
           </button>
         </div>
       </section>
@@ -563,6 +572,27 @@ export default function ApplePayMock({
     setPaymentDetails((current) => ({ ...current, [field]: value }));
   };
 
+
+  const authorisePayment = (notification: string) => {
+    setTransactions((current) => [
+      {
+        id: makeId(),
+        merchant: paymentDetails.merchant,
+        amount: paymentDetails.amount,
+        card: paymentDetails.card,
+        createdAt: new Date().toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      },
+      ...current,
+    ]);
+    setStatus("success");
+    setIsDeclinedModalOpen(false);
+    setEnforcerNotification(notification);
+    setActiveNotification(notification);
+  };
+
   const performPayment = async () => {
     if (status === "authorising") return;
 
@@ -591,21 +621,7 @@ export default function ApplePayMock({
       return;
     }
 
-    setTransactions((current) => [
-      {
-        id: makeId(),
-        merchant: paymentDetails.merchant,
-        amount: paymentDetails.amount,
-        card: paymentDetails.card,
-        createdAt: new Date().toLocaleTimeString("en-GB", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-      ...current,
-    ]);
-    setStatus("success");
-    setActiveNotification(notification);
+    authorisePayment(notification);
   };
 
   const resetPayment = () => {
@@ -617,6 +633,10 @@ export default function ApplePayMock({
   const handleClose = () => {
     onClose?.();
     resetPayment();
+  };
+
+  const overrideDeclinedPayment = () => {
+    authorisePayment("Payment manually authorised after override.");
   };
 
   return (
@@ -806,6 +826,7 @@ export default function ApplePayMock({
             message={declinedMessage}
             paymentDetails={paymentDetails}
             onClose={() => setIsDeclinedModalOpen(false)}
+            onOverride={overrideDeclinedPayment}
           />
         )}
       </div>
