@@ -13,9 +13,11 @@ from .observability import (
 )
 from .prompt import AGENT_INSTRUCTION
 from .tools.bigquery_tool import run_bigquery_query
+from .tools.spiciness_tool import spiciness_tool
 from .tools.customersearch import customer_database_search, customer_id_search
 from .tools.productsearch import vertex_vector_search
 from .tools.ecommerce_tools import lookup_user_orders, check_product_stock, sales_reporting_query
+from .tools.build_user_finances import build_user_finances
 
 load_dotenv()
 
@@ -40,7 +42,8 @@ root_agent = Agent(
     model=VertexGemini(model="gemini-2.5-flash"),
     description="A helpful banking assistant.",
     instruction=AGENT_INSTRUCTION,
-    tools=[customer_id_search, customer_database_search, vertex_vector_search, run_bigquery_query, lookup_user_orders, check_product_stock, sales_reporting_query],
+    tools=[customer_id_search, spiciness_tool, customer_database_search, vertex_vector_search, run_bigquery_query, lookup_user_orders, check_product_stock, sales_reporting_query, build_user_finances],
     before_model_callback=before_model_callback,
     after_model_callback=after_model_callback,
 )
+
