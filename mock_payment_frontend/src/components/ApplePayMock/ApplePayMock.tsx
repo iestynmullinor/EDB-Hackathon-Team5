@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { evaluatePaymentWithEnforcer } from "../../lib/enforcerAgent";
 import "./ApplePayMock.css";
 
-type PaymentStatus = "idle" | "authorising" | "success";
+type PaymentStatus = "idle" | "authorising" | "success" | "declined";
 
 type Transaction = {
   id: string;
@@ -24,6 +25,8 @@ type EditablePaymentDetails = {
 
 type Props = {
   onClose?: () => void;
+  notificationMessage?: string;
+  shouldPaymentGoThrough?: boolean;
 };
 
 const defaultPaymentDetails: EditablePaymentDetails = {
@@ -220,6 +223,26 @@ function SuccessIcon() {
   );
 }
 
+function DeclinedIcon() {
+  return (
+    <svg
+      className="declined-icon-svg"
+      viewBox="0 0 32 32"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="16" cy="16" r="15" fill="currentColor" />
+      <path
+        d="m10.4 10.4 11.2 11.2M21.6 10.4 10.4 21.6"
+        fill="none"
+        stroke="white"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function SpeakerIcon() {
   return (
     <svg
@@ -243,18 +266,196 @@ function SpeakerIcon() {
   );
 }
 
-export default function ApplePayMock({ onClose }: Props = {}) {
+type NotificationTone = "success" | "declined";
+
+function WalletNotificationIcon({ tone }: { tone: NotificationTone }) {
+  return (
+    <svg
+      className="wallet-notification-icon"
+      viewBox="0 0 44 44"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <linearGradient
+          id="walletIconBase"
+          x1="8"
+          x2="36"
+          y1="5"
+          y2="39"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#1f8cff" />
+          <stop offset="1" stopColor="#0057ff" />
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="40" height="40" rx="10" fill="url(#walletIconBase)" />
+      <rect x="9" y="13" width="26" height="18" rx="5" fill="white" opacity="0.94" />
+      <rect x="12" y="16" width="20" height="4" rx="2" fill="#ff9f0a" />
+      <rect x="12" y="22" width="16" height="4" rx="2" fill="#34c759" />
+      <circle
+        className="wallet-notification-badge"
+        cx="34"
+        cy="34"
+        r="8"
+        fill="currentColor"
+      />
+      {tone === "declined" ? (
+        <path
+          d="m30.8 30.8 6.4 6.4M37.2 30.8l-6.4 6.4"
+          fill="none"
+          stroke="white"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        />
+      ) : (
+        <path
+          d="m30.4 34.1 2.5 2.5 5-5.5"
+          fill="none"
+          stroke="white"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      )}
+    </svg>
+  );
+}
+
+function PaymentNotification({
+  message,
+  tone,
+  onDismiss,
+}: {
+  message: string;
+  tone: NotificationTone;
+  onDismiss: () => void;
+}) {
+  return (
+    <div
+      className={`payment-notification ${tone}`}
+      role="status"
+      aria-live="polite"
+    >
+      <button
+        className="payment-notification-card"
+        type="button"
+        onClick={onDismiss}
+        aria-label="Dismiss notification"
+      >
+        <WalletNotificationIcon tone={tone} />
+        <span className="payment-notification-copy">
+          <span className="payment-notification-header">
+            <strong>Wallet</strong>
+            <span>now</span>
+          </span>
+          <span className="payment-notification-message">{message}</span>
+        </span>
+      </button>
+    </div>
+  );
+}
+
+function DeclinedPaymentModal({
+  message,
+  paymentDetails,
+  onClose,
+  onTryAgain,
+}: {
+  message: string;
+  paymentDetails: EditablePaymentDetails;
+  onClose: () => void;
+  onTryAgain: () => void;
+}) {
+  return (
+    <div className="declined-modal-backdrop" role="presentation" onClick={onClose}>
+      <section
+        className="declined-modal"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="declined-modal-title"
+        aria-describedby="declined-modal-message"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          className="declined-modal-close"
+          type="button"
+          onClick={onClose}
+          aria-label="Close declined payment modal"
+        >
+          <CloseIcon />
+        </button>
+
+        <div className="declined-modal-icon">
+          <DeclinedIcon />
+        </div>
+
+        <h2 id="declined-modal-title">Payment declined</h2>
+        <p id="declined-modal-message">{message}</p>
+
+        <dl className="declined-payment-summary">
+          <div>
+            <dt>Merchant</dt>
+            <dd>{paymentDetails.merchant}</dd>
+          </div>
+          <div>
+            <dt>Amount</dt>
+            <dd>{paymentDetails.amount}</dd>
+          </div>
+          <div>
+            <dt>Card</dt>
+            <dd>{paymentDetails.card}</dd>
+          </div>
+        </dl>
+
+        <div className="declined-modal-actions">
+          <button className="modal-secondary-button" type="button" onClick={onClose}>
+            Keep open
+          </button>
+          <button className="modal-primary-button" type="button" onClick={onTryAgain}>
+            Try again
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+export default function ApplePayMock({
+  onClose,
+  notificationMessage = "",
+  shouldPaymentGoThrough = true,
+}: Props = {}) {
   const [status, setStatus] = useState<PaymentStatus>("idle");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [paymentDetails, setPaymentDetails] = useState(defaultPaymentDetails);
+  const [activeNotification, setActiveNotification] = useState<string | null>(null);
+  const [enforcerNotification, setEnforcerNotification] = useState<string | null>(null);
+  const [isDeclinedModalOpen, setIsDeclinedModalOpen] = useState(false);
 
   const latestTransaction = transactions[0];
+  const customNotificationMessage = notificationMessage.trim();
+  const declinedMessage =
+    enforcerNotification ||
+    customNotificationMessage ||
+    "Your payment was declined. Please check the card details or try another card.";
 
   const statusLabel = useMemo(() => {
     if (status === "authorising") return "Authorising payment";
     if (status === "success") return "Payment complete";
+    if (status === "declined") return "Payment declined";
     return "Ready to pay";
   }, [status]);
+
+  useEffect(() => {
+    if (!activeNotification) return;
+
+    const timeout = window.setTimeout(() => {
+      setActiveNotification(null);
+    }, 4200);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeNotification]);
 
   const updatePaymentDetail = (
     field: keyof EditablePaymentDetails,
@@ -263,31 +464,54 @@ export default function ApplePayMock({ onClose }: Props = {}) {
     setPaymentDetails((current) => ({ ...current, [field]: value }));
   };
 
-  const performPayment = () => {
+  const performPayment = async () => {
     if (status === "authorising") return;
 
     setStatus("authorising");
+    setIsDeclinedModalOpen(false);
+    setActiveNotification(null);
+    setEnforcerNotification(null);
 
-    window.setTimeout(() => {
-      setTransactions((current) => [
-        {
-          id: makeId(),
-          merchant: paymentDetails.merchant,
-          amount: paymentDetails.amount,
-          card: paymentDetails.card,
-          createdAt: new Date().toLocaleTimeString("en-GB", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        },
-        ...current,
-      ]);
-      setStatus("success");
-    }, 900);
+    const enforcerDecision = await evaluatePaymentWithEnforcer({
+      merchant: paymentDetails.merchant,
+      amount: paymentDetails.amount,
+      card: paymentDetails.card,
+    });
+
+    const paymentApproved = enforcerDecision.approve && shouldPaymentGoThrough;
+    const notification = shouldPaymentGoThrough
+      ? enforcerDecision.notification
+      : customNotificationMessage || "Payment blocked by the local mock setting.";
+    setEnforcerNotification(notification);
+
+    if (!paymentApproved) {
+      setStatus("declined");
+      setIsDeclinedModalOpen(true);
+      setActiveNotification(notification);
+      return;
+    }
+
+    setTransactions((current) => [
+      {
+        id: makeId(),
+        merchant: paymentDetails.merchant,
+        amount: paymentDetails.amount,
+        card: paymentDetails.card,
+        createdAt: new Date().toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      },
+      ...current,
+    ]);
+    setStatus("success");
+    setActiveNotification(notification);
   };
 
   const resetPayment = () => {
     setStatus("idle");
+    setIsDeclinedModalOpen(false);
+    setEnforcerNotification(null);
   };
 
   const handleClose = () => {
@@ -301,6 +525,14 @@ export default function ApplePayMock({ onClose }: Props = {}) {
       aria-label="Mock Lloyds Pay screen"
     >
       <div className="apple-pay-canvas">
+        {activeNotification && (
+          <PaymentNotification
+            message={activeNotification}
+            tone={status === "declined" ? "declined" : "success"}
+            onDismiss={() => setActiveNotification(null)}
+          />
+        )}
+
         <div className="basket-page" aria-hidden="true">
           <div className="device-cutout" />
           <div className="basket-content">
@@ -357,9 +589,9 @@ export default function ApplePayMock({ onClose }: Props = {}) {
             </div>
             <div className="row-copy">
               <input
-                aria-label="Merchant"
+                aria-label="Payment detail label"
                 className="apple-pay-editable-input row-label-input"
-                value={"Merchant:"}
+                value={paymentDetails.shipLabel}
                 onChange={(event) =>
                   updatePaymentDetail("shipLabel", event.target.value)
                 }
@@ -424,12 +656,12 @@ export default function ApplePayMock({ onClose }: Props = {}) {
             {status === "authorising" && (
               <div className="payment-status-panel" role="status">
                 <FingerprintIcon />
-                <span>Verifying with Touch ID</span>
+                <span>Checking with Enforcer Agent</span>
               </div>
             )}
 
             {status === "success" && (
-              <div className="payment-status-panel success-panel" role="status">
+              <div className="payment-status-panel result-panel success-panel" role="status">
                 <SuccessIcon />
                 <strong>Done</strong>
                 <span>
@@ -442,6 +674,17 @@ export default function ApplePayMock({ onClose }: Props = {}) {
                 </button>
               </div>
             )}
+
+            {status === "declined" && (
+              <div className="payment-status-panel result-panel declined-panel" role="status">
+                <DeclinedIcon />
+                <strong>Declined</strong>
+                <span>{declinedMessage}</span>
+                <button onClick={resetPayment} type="button">
+                  Try again
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="home-indicator" aria-hidden="true" />
@@ -449,6 +692,15 @@ export default function ApplePayMock({ onClose }: Props = {}) {
             <SpeakerIcon />
           </div>
         </section>
+
+        {isDeclinedModalOpen && (
+          <DeclinedPaymentModal
+            message={declinedMessage}
+            paymentDetails={paymentDetails}
+            onClose={() => setIsDeclinedModalOpen(false)}
+            onTryAgain={resetPayment}
+          />
+        )}
       </div>
     </section>
   );

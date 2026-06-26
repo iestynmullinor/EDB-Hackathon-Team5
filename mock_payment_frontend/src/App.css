@@ -1,11 +1,14 @@
 .app-shell {
-  min-height: 100svh;
-  width: 100%;
-  margin: 0;
+  width: min(390px, 100vw, 46.2svh);
+  aspect-ratio: 390 / 844;
+  margin: 0 auto;
   padding: 0;
   overflow: hidden;
   background: #f5f5f7;
   color: #111111;
+  border-radius: clamp(0px, calc((100vw - 430px) * 999), 46px);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 0.28);
+  isolation: isolate;
 }
 
 button,

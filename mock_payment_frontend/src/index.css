@@ -14,18 +14,28 @@
 html,
 body,
 #root {
+  width: 100%;
   min-height: 100%;
 }
 
 body {
   margin: 0;
   min-width: 320px;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
   font-family: inherit;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f3f4f7;
+  background:
+    radial-gradient(circle at 50% 0%, rgb(255 255 255 / 0.75), transparent 34%),
+    linear-gradient(180deg, #f3f4f7 0%, #dfe3ea 100%);
 }
 
 #root {
   min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 0;
 }
