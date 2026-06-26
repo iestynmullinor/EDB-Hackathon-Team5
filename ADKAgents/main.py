@@ -5,6 +5,7 @@
 import os
 import uvicorn
 from google.adk.cli.fast_api import get_fast_api_app
+from fastapi.middleware.cors import CORSMiddleware
 
 # 1. Grab the dynamic port assigned by Google Cloud Run
 port = int(os.environ.get("PORT", 8080))
@@ -17,16 +18,24 @@ app = get_fast_api_app(
     web=True,
     trace_to_cloud=os.environ.get("TRACE_TO_CLOUD", "false").lower() == "true",
 )
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 from fastapi.responses import HTMLResponse
-from bank_agent.observability import store, CostGranularity
-
+from front_of_house_agent.observability import store, CostGranularity
 
 @app.get("/obs", response_class=HTMLResponse)
 async def obs_dashboard():
     """Serves the frontend dashboard for agent observability."""
-    html_path = os.path.join(AGENT_DIR, "bank_agent", "observability", "dashboard.html")
+    html_path = os.path.join(AGENT_DIR, "front_of_house_agent", "observability", "dashboard.html")
     if os.path.exists(html_path):
         with open(html_path, "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())

@@ -29,7 +29,7 @@ type Props = {
 const defaultPaymentDetails: EditablePaymentDetails = {
   card: "Apple Card",
   merchant: "Pet Store",
-  amount: "US$24.99",
+  amount: "GBP£24.99",
   shipLabel: "Ship to",
   recipient: "Juan Chavez",
   addressLineOne: "683 Jefferson Street",
