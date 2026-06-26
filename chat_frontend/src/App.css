@@ -1,0 +1,32 @@
+.app-shell {
+  min-height: 100svh;
+  padding: clamp(18px, 4vw, 44px);
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 12% 8%, rgb(0 122 255 / 0.12), transparent 26%),
+    radial-gradient(circle at 88% 12%, rgb(52 199 89 / 0.12), transparent 24%),
+    #f3f4f7;
+  color: #111111;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgb(0 122 255 / 0.35);
+  outline-offset: 3px;
+}
+
+@media (max-width: 520px) {
+  .app-shell {
+    padding: 14px;
+  }
+}
