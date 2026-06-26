@@ -80,16 +80,51 @@ function LloydsCardIcon() {
       focusable="false"
     >
       <defs>
-        <linearGradient id="lbgGrad" x1="0" y1="0" x2="48" y2="34" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="lbgGrad"
+          x1="0"
+          y1="0"
+          x2="48"
+          y2="34"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#006A4E" />
           <stop offset="1" stopColor="#004D38" />
         </linearGradient>
       </defs>
       <rect width="48" height="34" rx="7" fill="url(#lbgGrad)" />
-      <rect x="0.5" y="0.5" width="47" height="33" rx="6.5" fill="none" stroke="white" strokeOpacity="0.2" />
+      <rect
+        x="0.5"
+        y="0.5"
+        width="47"
+        height="33"
+        rx="6.5"
+        fill="none"
+        stroke="white"
+        strokeOpacity="0.2"
+      />
       {/* Lloyds wordmark */}
-      <text x="7" y="14" fill="white" fillOpacity="0.9" fontSize="5" fontWeight="bold" fontFamily="Arial, sans-serif">LLOYDS</text>
-      <text x="7" y="20" fill="white" fillOpacity="0.6" fontSize="3.5" fontFamily="Arial, sans-serif">BANK</text>
+      <text
+        x="7"
+        y="14"
+        fill="white"
+        fillOpacity="0.9"
+        fontSize="5"
+        fontWeight="bold"
+        fontFamily="Arial, sans-serif"
+      >
+        LLOYDS
+      </text>
+      <text
+        x="7"
+        y="20"
+        fill="white"
+        fillOpacity="0.6"
+        fontSize="3.5"
+        fontFamily="Arial, sans-serif"
+      >
+        BANK
+      </text>
       {/* Card number dots */}
       <g fill="white" fillOpacity="0.55">
         <circle cx="8" cy="28" r="1.3" />
@@ -102,7 +137,13 @@ function LloydsCardIcon() {
         <circle cx="38" cy="28" r="1.3" />
       </g>
       {/* Contactless symbol */}
-      <g fill="none" stroke="white" strokeOpacity="0.7" strokeWidth="1.2" strokeLinecap="round">
+      <g
+        fill="none"
+        stroke="white"
+        strokeOpacity="0.7"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      >
         <path d="M39 8a5 5 0 0 1 0 7" />
         <path d="M41 6a8 8 0 0 1 0 11" />
       </g>
@@ -174,8 +215,20 @@ function TapPayIcon() {
       aria-hidden="true"
       focusable="false"
     >
-      <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="2.25" />
-      <g fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <circle
+        cx="16"
+        cy="16"
+        r="14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.25"
+      />
+      <g
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      >
         <path d="M11 16a5 5 0 0 1 5-5" />
         <path d="M11 16a5 5 0 0 0 5 5" />
         <path d="M14 16a2 2 0 0 1 2-2" />
@@ -194,10 +247,34 @@ function FingerprintIcon() {
       aria-hidden="true"
       focusable="false"
     >
-      <path d="M20 6C12.3 6 6 12.3 6 20s6.3 14 14 14 14-6.3 14-14S27.7 6 20 6Z" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-      <path d="M14 20c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M17 20a3 3 0 1 1 6 0" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M11 20c0-5 4-9 9-9s9 4 9 9c0 3-1.4 5.7-3.5 7.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <path
+        d="M20 6C12.3 6 6 12.3 6 20s6.3 14 14 14 14-6.3 14-14S27.7 6 20 6Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M14 20c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M17 20a3 3 0 1 1 6 0"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M11 20c0-5 4-9 9-9s9 4 9 9c0 3-1.4 5.7-3.5 7.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -289,8 +366,23 @@ function WalletNotificationIcon({ tone }: { tone: NotificationTone }) {
           <stop offset="1" stopColor="#0057ff" />
         </linearGradient>
       </defs>
-      <rect x="2" y="2" width="40" height="40" rx="10" fill="url(#walletIconBase)" />
-      <rect x="9" y="13" width="26" height="18" rx="5" fill="white" opacity="0.94" />
+      <rect
+        x="2"
+        y="2"
+        width="40"
+        height="40"
+        rx="10"
+        fill="url(#walletIconBase)"
+      />
+      <rect
+        x="9"
+        y="13"
+        width="26"
+        height="18"
+        rx="5"
+        fill="white"
+        opacity="0.94"
+      />
       <rect x="12" y="16" width="20" height="4" rx="2" fill="#ff9f0a" />
       <rect x="12" y="22" width="16" height="4" rx="2" fill="#34c759" />
       <circle
@@ -360,15 +452,17 @@ function DeclinedPaymentModal({
   message,
   paymentDetails,
   onClose,
-  onTryAgain,
 }: {
   message: string;
   paymentDetails: EditablePaymentDetails;
   onClose: () => void;
-  onTryAgain: () => void;
 }) {
   return (
-    <div className="declined-modal-backdrop" role="presentation" onClick={onClose}>
+    <div
+      className="declined-modal-backdrop"
+      role="presentation"
+      onClick={onClose}
+    >
       <section
         className="declined-modal"
         role="alertdialog"
@@ -409,11 +503,12 @@ function DeclinedPaymentModal({
         </dl>
 
         <div className="declined-modal-actions">
-          <button className="modal-secondary-button" type="button" onClick={onClose}>
-            Keep open
-          </button>
-          <button className="modal-primary-button" type="button" onClick={onTryAgain}>
-            Try again
+          <button
+            className="modal-primary-button"
+            type="button"
+            onClick={onClose}
+          >
+            Dismiss
           </button>
         </div>
       </section>
@@ -429,8 +524,12 @@ export default function ApplePayMock({
   const [status, setStatus] = useState<PaymentStatus>("idle");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [paymentDetails, setPaymentDetails] = useState(defaultPaymentDetails);
-  const [activeNotification, setActiveNotification] = useState<string | null>(null);
-  const [enforcerNotification, setEnforcerNotification] = useState<string | null>(null);
+  const [activeNotification, setActiveNotification] = useState<string | null>(
+    null,
+  );
+  const [enforcerNotification, setEnforcerNotification] = useState<
+    string | null
+  >(null);
   const [isDeclinedModalOpen, setIsDeclinedModalOpen] = useState(false);
 
   const latestTransaction = transactions[0];
@@ -481,7 +580,8 @@ export default function ApplePayMock({
     const paymentApproved = enforcerDecision.approve && shouldPaymentGoThrough;
     const notification = shouldPaymentGoThrough
       ? enforcerDecision.notification
-      : customNotificationMessage || "Payment blocked by the local mock setting.";
+      : customNotificationMessage ||
+        "Payment blocked by the local mock setting.";
     setEnforcerNotification(notification);
 
     if (!paymentApproved) {
@@ -558,7 +658,9 @@ export default function ApplePayMock({
         >
           <header className="apple-pay-sheet-header">
             <div className="apple-pay-wordmark" aria-label="Lloyds Pay">
-              <span>Lloyds <strong>Pay</strong></span>
+              <span>
+                Lloyds <strong>Pay</strong>
+              </span>
             </div>
             <button
               className="apple-pay-close"
@@ -661,7 +763,10 @@ export default function ApplePayMock({
             )}
 
             {status === "success" && (
-              <div className="payment-status-panel result-panel success-panel" role="status">
+              <div
+                className="payment-status-panel result-panel success-panel"
+                role="status"
+              >
                 <SuccessIcon />
                 <strong>Done</strong>
                 <span>
@@ -676,7 +781,10 @@ export default function ApplePayMock({
             )}
 
             {status === "declined" && (
-              <div className="payment-status-panel result-panel declined-panel" role="status">
+              <div
+                className="payment-status-panel result-panel declined-panel"
+                role="status"
+              >
                 <DeclinedIcon />
                 <strong>Declined</strong>
                 <span>{declinedMessage}</span>
@@ -698,7 +806,6 @@ export default function ApplePayMock({
             message={declinedMessage}
             paymentDetails={paymentDetails}
             onClose={() => setIsDeclinedModalOpen(false)}
-            onTryAgain={resetPayment}
           />
         )}
       </div>
