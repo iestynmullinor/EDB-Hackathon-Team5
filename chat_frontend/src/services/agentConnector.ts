@@ -2,8 +2,20 @@ export interface AgentReply {
   text: string;
 }
 
+// Hardcoded customer for this build. Sent to the backend to bootstrap the
+// conversation so the agent's first greeting is already customer-aware.
+// Both the name and ID are sent so the backend can do ID-based lookups, but
+// the agent is instructed to address the customer by first name only.
+export const CUSTOMER_ID = 'CUST_ABZ_003';
+export const CUSTOMER_NAME = 'Charlie';
+
+const INIT_MESSAGE =
+  `Hello, my name is ${CUSTOMER_NAME} and my customer ID is ${CUSTOMER_ID}.`;
+
+// Defaults to the Vite dev proxy path ('/adk' -> 127.0.0.1:8080, see
+// vite.config.ts) so requests are same-origin and avoid CORS errors.
 const AGENT_BASE_URL = (
-  import.meta.env.VITE_AGENT_BASE_URL ?? 'http://localhost:8080'
+  import.meta.env.VITE_AGENT_BASE_URL ?? '/adk'
 ).replace(/\/$/, '');
 
 const ADK_APP_NAME = import.meta.env.VITE_ADK_APP_NAME ?? 'front_of_house_agent';
@@ -124,4 +136,11 @@ async function runAgent(message: string, currentSessionId: string): Promise<Agen
 export async function sendMessageToAgent(message: string): Promise<AgentReply> {
   const currentSessionId = await ensureSession();
   return runAgent(message, currentSessionId);
+}
+
+// Bootstraps the conversation: opens a session, sends the hardcoded customer ID
+// to the backend, and returns the agent's first (real) greeting.
+export async function startConversation(): Promise<AgentReply> {
+  const currentSessionId = await ensureSession();
+  return runAgent(INIT_MESSAGE, currentSessionId);
 }

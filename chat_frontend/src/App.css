@@ -1,13 +1,20 @@
+:root {
+  --lloyds-green: #006a4d;
+  --lloyds-green-dark: #024731;
+  --lloyds-green-deep: #00352a;
+  --lloyds-ink: #0a0a0a;
+}
+
 .app-shell {
   min-height: 100svh;
   padding: clamp(18px, 4vw, 44px);
   display: grid;
   place-items: center;
   background:
-    radial-gradient(circle at 12% 8%, rgb(0 122 255 / 0.12), transparent 26%),
-    radial-gradient(circle at 88% 12%, rgb(52 199 89 / 0.12), transparent 24%),
-    #f3f4f7;
-  color: #111111;
+    radial-gradient(circle at 12% 8%, rgb(0 106 77 / 0.16), transparent 28%),
+    radial-gradient(circle at 88% 10%, rgb(0 106 77 / 0.10), transparent 26%),
+    #eef1ee;
+  color: var(--lloyds-ink);
 }
 
 button,
@@ -21,7 +28,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgb(0 122 255 / 0.35);
+  outline: 3px solid rgb(0 106 77 / 0.4);
   outline-offset: 3px;
 }
 

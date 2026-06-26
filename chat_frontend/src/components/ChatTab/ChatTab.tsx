@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { sendMessageToAgent } from '../../services/agentConnector';
+import { sendMessageToAgent, startConversation } from '../../services/agentConnector';
 import './ChatTab.css';
 
 type MessageRole = 'agent' | 'user';
@@ -15,23 +15,49 @@ function makeId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-const STARTER_MESSAGES: ChatMessage[] = [
-  {
-    id: 'welcome-message',
-    role: 'agent',
-    text: 'Hi, I am your agent placeholder. Send a message here and connect me to your backend later.',
-  },
-];
-
 export default function ChatTab() {
-  const [messages, setMessages] = useState<ChatMessage[]>(STARTER_MESSAGES);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const bootstrapped = useRef(false);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, sending]);
+
+  // On mount, bootstrap the conversation with the hardcoded customer ID and
+  // show the backend's first greeting instead of a placeholder.
+  useEffect(() => {
+    if (bootstrapped.current) return;
+    bootstrapped.current = true;
+
+    const init = async () => {
+      setSending(true);
+      try {
+        const reply = await startConversation();
+        setMessages([
+          {
+            id: makeId(),
+            role: 'agent',
+            text: reply.text,
+          },
+        ]);
+      } catch {
+        setMessages([
+          {
+            id: makeId(),
+            role: 'agent',
+            text: 'Sorry, I could not reach the agent service. Check your backend connection.',
+          },
+        ]);
+      } finally {
+        setSending(false);
+      }
+    };
+
+    void init();
+  }, []);
 
   const sendMessage = async () => {
     const trimmed = input.trim();
@@ -81,11 +107,13 @@ export default function ChatTab() {
   return (
     <section className="chat-tab" aria-label="Agent chat">
       <header className="chat-header">
-        <div>
-          <p className="eyebrow">Agent chat</p>
-          <h1>Talk to your agent</h1>
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true" />
+          <div>
+            <p className="eyebrow">Lloyds Bank</p>
+            <h1>Budget Assistant</h1>
+          </div>
         </div>
-        <span className="status-pill">Mock mode</span>
       </header>
 
       <div className="message-panel">
