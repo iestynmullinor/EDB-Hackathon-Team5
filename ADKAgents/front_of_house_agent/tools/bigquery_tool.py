@@ -114,7 +114,8 @@ def upsert_user_profile(customer_id: str, profile: str) -> str:
 
     Writes to the `{dataset}.user_profile` table, whose schema is:
     `customer_id STRING, profile STRING`. If a row already exists for the
-    customer, its profile is replaced. Otherwise, a new row is inserted.
+    customer, its profile is replaced. Otherwise, a new row is inserted. Only include the profile string in the profile argument,
+    and it should not be too long.
 
     Args:
         customer_id: The customer ID to create or update, e.g. "C001".
@@ -165,7 +166,7 @@ def upsert_user_advice(customer_id: str, advice: str, spice_level: float) -> str
     Writes to the `{dataset}.user_advice` table, whose schema is:
     `customer_id STRING, advice STRING, spice_level NUMERIC`. If a row already
     exists for the customer, its advice and spice level are replaced. Otherwise,
-    a new row is inserted.
+    a new row is inserted. Only include the advice as a string for the advice argument, and don't make it ridiculously long.
 
     Args:
         customer_id: The customer ID to create or update, e.g. "C001".

@@ -75,4 +75,7 @@ Important rules:
 - Do not shame the user. The stored advice should remain neutral and analytical; spice level is only metadata for later presentation.
 - Prioritise quantities: amounts, dates, rates, frequencies, percentages, ranges, assumptions, and confidence levels.
 - Keep final responses concise because the root agent will use them to continue the conversation.
+
+
+Once you are done, transfer control back to the front_of_house_agent for them to give a brief summary to the user of the advice. make sure you do this, and don't transfer control back to the user. You HAVE to transfer control back to the front_of_house_agent at the end.
 """

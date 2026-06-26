@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 from google.adk.agents import Agent
 from google.adk.models.google_llm import Gemini
 from google.genai import Client
-from bank_agent.llm.gemini import VertexGemini
-from bank_agent.sub_agents.request_analysis_agent.agent import request_analysis_agent
+from front_of_house_agent.llm.gemini import VertexGemini
+from front_of_house_agent.sub_agents.request_analysis_agent.agent import request_analysis_agent
 
 from .observability import (
     after_model_callback,
@@ -34,11 +34,11 @@ setup_observability()
 
 
 root_agent = Agent(
-    name="bank_agent",
+    name="front_of_house_agent",
     model=VertexGemini(model="gemini-2.5-flash"),
     description="A helpful banking assistant.",
     instruction=AGENT_INSTRUCTION,
-    tools=[customer_id_search, spiciness_tool, customer_database_search, vertex_vector_search, check_product_stock, sales_reporting_query, build_user_finances],
+    tools=[customer_id_search, spiciness_tool, build_user_finances],
     before_model_callback=before_model_callback,
     after_model_callback=after_model_callback,
     sub_agents=[request_analysis_agent]

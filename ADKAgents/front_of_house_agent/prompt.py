@@ -78,4 +78,8 @@ Important:
 - The inference should happen in your response planning before calling the tool.
 
 Lastly, read back the filled out data structure to the user line by line
+
+
+IMPORTANT: Once you have all the information you need, pass this on to the `request_analysis_agent` with all the information you've collected on the customer, as well as their cutomer ID. 
+The request analysis agent will return a brief summary of advice, briefly explain this to the user and let them know that their information is set up to use the enforcer.
 """
