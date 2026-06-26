@@ -4,7 +4,7 @@
   overflow: hidden;
   background: #e9edf0;
   color: #111111;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
 .apple-pay-canvas {
@@ -179,20 +179,16 @@
 .apple-pay-wordmark {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  color: #000000;
-  font-size: 21px;
+  gap: 8px;
+  color: #006A4E;
+  font-size: 18px;
   line-height: 1;
-  font-weight: 800;
-  letter-spacing: -0.045em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
-.apple-logo-icon {
-  width: 19px;
-  height: 23px;
-  display: block;
-  fill: currentColor;
-  transform: translateY(-1px);
+.apple-pay-wordmark strong {
+  font-weight: 800;
 }
 
 .apple-pay-close {
@@ -237,12 +233,11 @@
   grid-template-columns: 36px 1fr 13px;
 }
 
-.apple-card-icon {
+.lloyds-card-icon {
   width: 30px;
   height: 22px;
   display: block;
   border-radius: 5px;
-  filter: saturate(1.22);
 }
 
 .apple-pay-address-row {
@@ -300,8 +295,8 @@
 
 .apple-pay-editable-input:focus {
   outline: 0;
-  background: rgb(0 122 255 / 0.08);
-  box-shadow: 0 0 0 3px rgb(0 122 255 / 0.16);
+  background: rgb(0 106 78 / 0.08);
+  box-shadow: 0 0 0 3px rgb(0 106 78 / 0.16);
 }
 
 .apple-pay-card-input {
@@ -407,7 +402,7 @@
 .side-button-svg {
   width: 27px;
   height: 27px;
-  color: #007aff;
+  color: #006A4E;
   display: block;
 }
 
@@ -424,7 +419,7 @@
 .face-id-svg {
   width: 34px;
   height: 34px;
-  color: #007aff;
+  color: #006A4E;
   display: block;
   animation: face-id-pulse 900ms ease-in-out infinite;
 }
@@ -449,7 +444,7 @@
   border-radius: 999px;
   padding: 5px 10px;
   color: #ffffff;
-  background: #007aff;
+  background: #006A4E;
   font: inherit;
   font-size: 11px;
   font-weight: 700;
@@ -460,7 +455,7 @@
   width: 25px;
   height: 25px;
   display: block;
-  color: #34c759;
+  color: #006A4E;
 }
 
 .home-indicator {
