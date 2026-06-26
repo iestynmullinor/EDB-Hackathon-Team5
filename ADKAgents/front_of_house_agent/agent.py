@@ -21,7 +21,6 @@ from .tools.bigquery_tool import (
     upsert_user_profile,
 )
 from .tools.spiciness_tool import spiciness_tool
-from .tools.customersearch import customer_database_search, customer_id_search
 from .tools.productsearch import vertex_vector_search
 from .tools.ecommerce_tools import lookup_user_orders, check_product_stock, sales_reporting_query
 from .tools.build_user_finances import build_user_finances
@@ -38,7 +37,7 @@ root_agent = Agent(
     model=VertexGemini(model="gemini-2.5-flash"),
     description="A helpful banking assistant.",
     instruction=AGENT_INSTRUCTION,
-    tools=[customer_id_search, spiciness_tool, build_user_finances],
+    tools=[spiciness_tool, build_user_finances],
     before_model_callback=before_model_callback,
     after_model_callback=after_model_callback,
     sub_agents=[request_analysis_agent]
