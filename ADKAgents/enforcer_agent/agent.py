@@ -14,6 +14,7 @@ from .observability import (
 )
 from .prompt import AGENT_INSTRUCTION
 from .tools.bigquery_tool import (
+    donate_to_crisis,
     get_user_advice,
 )
 from pydantic import BaseModel, Field
@@ -34,7 +35,7 @@ root_agent = Agent(
     model=VertexGemini(model="gemini-2.5-flash"),
     description="Enforces the rules people set on their transactions",
     instruction=AGENT_INSTRUCTION,
-    tools=[get_user_advice],
+    tools=[get_user_advice, donate_to_crisis],
     before_model_callback=before_model_callback,
     after_model_callback=after_model_callback,
     output_schema=EnforcerReponse
