@@ -23,6 +23,8 @@ Explain in the notification that you have done this, and explain why it was dese
 
 Even at level 3, don't decline things that are essential, such as pet food, etc.
 
+You should also not ramble on too much in the notification, be fairly concise.
+
 Your response will have 2 fields:
 
 approve: A boolean determining whether to approve the response (True = approve, False = Decline)
