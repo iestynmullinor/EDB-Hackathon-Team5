@@ -1,0 +1,525 @@
+.apple-pay-screen {
+  min-height: 100svh;
+  width: 100%;
+  overflow: hidden;
+  background: #e9edf0;
+  color: #111111;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+}
+
+.apple-pay-canvas {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  margin: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 12%, rgb(255 255 255 / 0.8), transparent 24%),
+    linear-gradient(180deg, #eef1f3 0%, #e2e7eb 100%);
+}
+
+.basket-page {
+  position: relative;
+  min-height: 100svh;
+  padding: max(76px, env(safe-area-inset-top)) 28px 32px;
+  color: #17191c;
+  transform: translateZ(0);
+}
+
+.basket-page::before,
+.basket-page::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.basket-page::before {
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0 28px, rgb(255 255 255 / 0.28) 28px 29px, transparent 29px 100%),
+    linear-gradient(180deg, transparent 0 96px, rgb(255 255 255 / 0.18) 96px 97px, transparent 97px 100%);
+  background-size: 112px 112px;
+  opacity: 0.18;
+}
+
+.basket-page::after {
+  top: 132px;
+  right: -80px;
+  width: 230px;
+  height: 230px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.32);
+  filter: blur(8px);
+}
+
+.device-cutout {
+  position: absolute;
+  z-index: 1;
+  top: 18px;
+  left: 50%;
+  width: 126px;
+  height: 36px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #050505;
+  box-shadow:
+    inset -18px 0 0 rgb(20 32 70 / 0.9),
+    0 2px 8px rgb(0 0 0 / 0.08);
+}
+
+.device-cutout::after {
+  content: "";
+  position: absolute;
+  right: 17px;
+  top: 10px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 58% 40%, #1a49a5 0 14%, #111a38 42%, #050505 72%);
+}
+
+.basket-content {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.basket-page h1 {
+  margin: 28px 0 36px;
+  font-size: 29px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+
+.basket-product-card {
+  margin-left: min(23px, 5vw);
+  width: min(430px, calc(100% - 46px));
+  min-height: 112px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.52), rgb(255 255 255 / 0.34));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.68),
+    0 22px 45px rgb(91 105 115 / 0.12);
+}
+
+.dog-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #3d894f;
+}
+
+.dog-food-icon {
+  width: 52px;
+  height: 52px;
+  display: block;
+}
+
+.basket-product-card h2 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.basket-product-card p {
+  margin: 0;
+  width: min(240px, 52vw);
+  color: #777a80;
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.apple-pay-dim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgb(0 0 0 / 0.64);
+  backdrop-filter: blur(2.2px) saturate(0.9);
+}
+
+.apple-pay-sheet {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: min(330px, 62svh);
+  padding: 14px 8px max(9px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px 12px 0 0;
+  color: #111111;
+  background:
+    linear-gradient(180deg, rgb(247 247 248 / 0.97), rgb(235 235 237 / 0.98));
+  box-shadow:
+    0 -22px 42px rgb(0 0 0 / 0.27),
+    inset 0 1px 0 rgb(255 255 255 / 0.86);
+  backdrop-filter: blur(34px) saturate(1.35);
+}
+
+.apple-pay-sheet-header {
+  height: 30px;
+  padding: 0 6px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.apple-pay-wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #000000;
+  font-size: 21px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+
+.apple-logo-icon {
+  width: 19px;
+  height: 23px;
+  display: block;
+  fill: currentColor;
+  transform: translateY(-1px);
+}
+
+.apple-pay-close {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #9b9ba0;
+  background: #dedee2;
+  cursor: pointer;
+}
+
+.close-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.close-icon path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.apple-pay-row {
+  position: relative;
+  margin: 7px 0;
+  min-height: 65px;
+  padding: 0 13px;
+  display: grid;
+  align-items: center;
+  column-gap: 12px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.91);
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.03);
+}
+
+.apple-pay-card-row {
+  grid-template-columns: 36px 1fr 13px;
+}
+
+.apple-card-icon {
+  width: 30px;
+  height: 22px;
+  display: block;
+  border-radius: 5px;
+  filter: saturate(1.22);
+}
+
+.apple-pay-address-row {
+  min-height: 116px;
+  grid-template-columns: 34px 1fr 13px;
+}
+
+.row-symbol {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  align-self: start;
+  margin-top: 13px;
+  color: #1c1c1e;
+}
+
+.address-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.row-copy {
+  min-width: 0;
+  line-height: 1.09;
+}
+
+.chevron-icon {
+  justify-self: end;
+  width: 8px;
+  height: 14px;
+  color: #c0c0c7;
+}
+
+.chevron-icon path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.apple-pay-editable-input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  border-radius: 5px;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.apple-pay-editable-input:focus {
+  outline: 0;
+  background: rgb(0 122 255 / 0.08);
+  box-shadow: 0 0 0 3px rgb(0 122 255 / 0.16);
+}
+
+.apple-pay-card-input {
+  color: #343438;
+  font-size: 14px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.row-label-input {
+  display: block;
+  color: #9b9ba1;
+  font-size: 11.5px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.row-strong-input {
+  display: block;
+  color: #47474b;
+  font-size: 14px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+}
+
+.row-copy-input {
+  display: block;
+  color: #1f1f22;
+  font-size: 14px;
+  line-height: 1.09;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.apple-pay-total-row {
+  min-height: 61px;
+  margin-top: 4px;
+  padding: 2px 10px 0;
+  display: grid;
+  grid-template-columns: 1fr 19px;
+  align-items: center;
+}
+
+.apple-pay-total-label {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin-bottom: 1px;
+  color: #96969d;
+  font-size: 11px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.apple-pay-total-label span {
+  flex: 0 0 auto;
+}
+
+.merchant-input {
+  color: #96969d;
+  font-size: 11px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.amount-input {
+  display: block;
+  color: #17171a;
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.055em;
+}
+
+.apple-pay-action-area {
+  min-height: 69px;
+  margin-top: auto;
+  display: grid;
+  place-items: center;
+}
+
+.double-click-button {
+  border: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  color: #111111;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  cursor: pointer;
+}
+
+.side-button-svg {
+  width: 27px;
+  height: 27px;
+  color: #007aff;
+  display: block;
+}
+
+.payment-status-panel {
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  color: #1c1c1e;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.face-id-svg {
+  width: 34px;
+  height: 34px;
+  color: #007aff;
+  display: block;
+  animation: face-id-pulse 900ms ease-in-out infinite;
+}
+
+.success-panel {
+  gap: 3px;
+}
+
+.success-panel strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.success-panel span {
+  color: #73737a;
+  font-size: 11px;
+}
+
+.success-panel button {
+  margin-top: 2px;
+  border: 0;
+  border-radius: 999px;
+  padding: 5px 10px;
+  color: #ffffff;
+  background: #007aff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.success-icon-svg {
+  width: 25px;
+  height: 25px;
+  display: block;
+  color: #34c759;
+}
+
+.home-indicator {
+  width: 139px;
+  height: 5px;
+  margin: 4px auto 0;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.9);
+}
+
+.sound-icon {
+  position: absolute;
+  right: 5px;
+  bottom: 9px;
+  width: 20px;
+  height: 20px;
+  color: #000000;
+  opacity: 0.35;
+}
+
+.speaker-icon-svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+@keyframes face-id-pulse {
+  50% {
+    transform: scale(1.08);
+    opacity: 0.68;
+  }
+}
+
+@media (max-width: 520px) {
+  .basket-content {
+    max-width: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .basket-page {
+    padding-inline: 20px;
+  }
+
+  .apple-pay-sheet {
+    min-height: min(326px, 68svh);
+  }
+
+  .apple-pay-row {
+    margin-block: 6px;
+  }
+
+  .apple-pay-address-row {
+    min-height: 112px;
+  }
+
+  .row-copy-input,
+  .row-strong-input,
+  .apple-pay-card-input {
+    font-size: 13px;
+  }
+}
