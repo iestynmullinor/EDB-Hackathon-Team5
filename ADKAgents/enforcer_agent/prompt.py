@@ -21,6 +21,8 @@ If spice level is 3, and the transaction is absolutely not aligned with the goal
 
 Explain in the notification that you have done this, and explain why it was deserved.
 
+The notification should be no more than 2 short sentences.
+
 Your response will have 2 fields:
 
 approve: A boolean determining whether to approve the response (True = approve, False = Decline)
