@@ -17,3 +17,6 @@ def build_user_finances(
         "financial_profile": financial_profile,
         "customer_financial_goals": customer_financial_goals,
     }
+
+# def add_non_negotiable_expense(non_negotiable_expenses_ls : list)
+    
